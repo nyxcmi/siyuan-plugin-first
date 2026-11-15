@@ -1,37 +1,29 @@
 import {
   Plugin,
 } from "siyuan";
-import { createApp } from 'vue'
-import App from './App.vue'
 
-let plugin = null
+let plugin: Plugin | null = null
+
+/** 绑定插件实例，供其他模块取用 */
 export function usePlugin(pluginProps?: Plugin): Plugin {
-  console.log('usePlugin', pluginProps, plugin)
   if (pluginProps) {
     plugin = pluginProps
   }
-  if (!plugin && !pluginProps) {
+  if (!plugin) {
     console.error('need bind plugin')
   }
-  return plugin;
+  return plugin as Plugin
 }
 
-
-let app = null
-export function init(plugin: Plugin) {
-  // bind plugin hook
-  usePlugin(plugin);
-
-  const div = document.createElement('div')
-  div.classList.toggle('plugin-sample-vite-vue-app')
-  div.id = this.name
-  app = createApp(App)
-  app.mount(div)
-  document.body.appendChild(div)
+/**
+ * 插件 onload 钩子。
+ * 模板原本会在这里挂一个 Vue 演示面板到 body 上，已移除。
+ */
+export function init(pluginProps: Plugin) {
+  usePlugin(pluginProps)
 }
 
+/** 插件 onunload 钩子 */
 export function destroy() {
-  app.unmount()
-  const div = document.getElementById(this.name)
-  document.body.removeChild(div)
+  plugin = null
 }

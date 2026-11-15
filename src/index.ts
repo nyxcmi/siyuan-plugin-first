@@ -5,6 +5,7 @@ import {
 import "@/index.scss";
 import PluginInfoString from '@/../plugin.json'
 import { destroy, init } from '@/main'
+import { openMoodDialog } from '@/mood'
 
 let PluginInfo = {
   version: '',
@@ -52,10 +53,24 @@ export default class PluginSample extends Plugin {
 
     console.log('Plugin loaded, the plugin is ', this)
 
+    // 👇 在这里加入代码 👇
+    this.addTopBar({
+        icon: "iconEmoji",       // 图标名称
+        title: "心情打点",        // 鼠标悬停显示的文字
+        position: "right",       // 右侧
+        callback: () => {
+            openMoodDialog();
+        }
+    });
+    // 👆 加入代码结束 👆
+
+
+
     init(this)
   }
 
   onunload() {
+
     destroy()
   }
 
