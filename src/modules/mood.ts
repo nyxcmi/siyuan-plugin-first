@@ -1,15 +1,17 @@
 /**
- * 心情打点：在当天文档末尾插入一条心情记录，并把结构化数据写进块属性。
+ * 模块：心情打点
  *
- * 数据不存插件私有文件，而是块属性：
+ * 在当天文档末尾插入一条心情记录，并把结构化数据写进块属性：
  *   custom-mood-score  分数 0-100
  *   custom-mood-emoji  表情
  *   custom-mood-at     ISO 时间
  *   custom-mood-note   备注（可选）
  *
- * 这样即使卸载插件，数据仍可用思源 SQL 查询块统计。
+ * 数据存在库里而不是插件里，所以卸载插件数据还在，也能被 SQL 统计。
  */
-import { appendBlock, setBlockAttrs, pushMsg, pushErrMsg } from "./api";
+import type { Plugin } from "siyuan";
+import { appendBlock, setBlockAttrs, pushMsg, pushErrMsg } from "../api";
+import type { JournalModule } from "./types";
 
 export interface MoodEntry {
   score: number;
@@ -36,7 +38,7 @@ export function formatStamp(d: Date): string {
 
 /**
  * 取当前激活编辑器的文档 ID。
- * 隐藏的页签 offsetParent 为 null，因此取最后一个可见的 .protyle-title。
+ * 隐藏的页签 getClientRects() 为空，所以取最后一个可见的 .protyle-title。
  */
 export function getActiveDocId(): string | null {
   const titles = Array.from(
@@ -66,7 +68,6 @@ export async function insertMood(docId: string, m: MoodEntry): Promise<string | 
     try {
       await setBlockAttrs(blockId, attrs);
     } catch (err) {
-      // 属性失败不影响正文，但要告诉用户
       pushErrMsg("心情已写入，但属性保存失败：" + (err as Error)?.message);
     }
   }
@@ -148,3 +149,21 @@ export function openMoodDialog(): void {
   sync();
   rangeEl.focus();
 }
+
+export const moodModule: JournalModule = {
+  id: "mood",
+  name: "心情打点",
+  description: "在文档末尾记录一条心情，分数与表情存入块属性",
+  setup(plugin: Plugin) {
+    const bar = plugin.addTopBar({
+      icon: "iconEmoji",
+      title: "心情打点",
+      position: "right",
+      callback: () => openMoodDialog(),
+    });
+
+    return () => {
+      bar?.remove();
+    };
+  },
+};

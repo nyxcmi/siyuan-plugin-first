@@ -5,7 +5,7 @@ import {
 import "@/index.scss";
 import PluginInfoString from '@/../plugin.json'
 import { destroy, init } from '@/main'
-import { openMoodDialog } from '@/mood'
+import { modules } from '@/modules'
 
 let PluginInfo = {
   version: '',
@@ -33,6 +33,9 @@ export default class PluginSample extends Plugin {
   public platform: SyFrontendTypes
   public readonly version = version
 
+  /** 各模块注册的清理函数，卸载时按顺序调用 */
+  private cleanups: Array<() => void> = []
+
   async onload() {
     const frontEnd = getFrontend();
     this.platform = frontEnd as SyFrontendTypes
@@ -53,28 +56,32 @@ export default class PluginSample extends Plugin {
 
     console.log('Plugin loaded, the plugin is ', this)
 
-    // 👇 在这里加入代码 👇
-    this.addTopBar({
-        icon: "iconEmoji",       // 图标名称
-        title: "心情打点",        // 鼠标悬停显示的文字
-        position: "right",       // 右侧
-        callback: () => {
-            openMoodDialog();
-        }
-    });
-    // 👆 加入代码结束 👆
-
-
-
     init(this)
+
+    // 逐个挂载模块。单个模块出错不影响其他模块。
+    for (const m of modules) {
+      try {
+        const cleanup = await m.setup(this)
+        if (typeof cleanup === "function") {
+          this.cleanups.push(cleanup)
+        }
+        console.log(`[module] ${m.id} (${m.name}) ready`)
+      } catch (err) {
+        console.error(`[module] ${m.id} (${m.name}) setup failed:`, err)
+      }
+    }
   }
 
   onunload() {
+    for (const cleanup of this.cleanups) {
+      try {
+        cleanup()
+      } catch (err) {
+        console.error('[module] cleanup failed:', err)
+      }
+    }
+    this.cleanups = []
 
     destroy()
-  }
-
-  openSetting() {
-    window._sy_plugin_sample.openSetting()
   }
 }
