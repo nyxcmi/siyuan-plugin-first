@@ -58,7 +58,7 @@ export default class PluginSample extends Plugin {
 
     init(this)
 
-    // 逐个挂载模块。单个模块出错不影响其他模块。
+    // 逐个挂载模块。单个模块出错不影响其他模块。00
     for (const m of modules) {
       try {
         const cleanup = await m.setup(this)
