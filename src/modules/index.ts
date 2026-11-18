@@ -1,6 +1,7 @@
 import type { JournalModule } from "./types";
 import { dailyModule } from "./daily";
 import { moodModule } from "./mood";
+import { timelineModule } from "./timeline";
 
 /**
  * 模块清单。
@@ -11,6 +12,7 @@ import { moodModule } from "./mood";
 export const modules: JournalModule[] = [
   dailyModule,
   moodModule,
+  timelineModule,
 ];
 
 export * from "./types";
