@@ -154,11 +154,18 @@ export const timelineModule: JournalModule = {
   name: "时间轴",
   description: "按天浏览与连续阅读日记（只读）",
   setup(plugin: Plugin) {
+    // 自定义图标必须自己注册，不能假设内置图标名可用
+    plugin.addIcons(`
+      <symbol id="iconJournalTimeline" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+      </symbol>
+    `);
+
     plugin.addDock({
       config: {
         position: "RightBottom",
         size: { width: 360, height: 0 },
-        icon: "iconCalendar",
+        icon: "iconJournalTimeline",
         title: "日记时间轴",
       },
       data: {},
